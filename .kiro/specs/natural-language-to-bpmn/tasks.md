@@ -1,6 +1,6 @@
 # 実装計画
 
-- [ ] 1. pnpmモノレポ構成とプロジェクト基盤の構築
+- [x] 1. pnpmモノレポ構成とプロジェクト基盤の構築
   - web-ui、mastra-agent、nlp-processor、bpmn-generator、shared-types、shared-utilsパッケージを含むpnpmワークスペース設定を作成
   - 各パッケージのTypeScript設定を初期化し、パッケージ間の適切な参照を設定
   - Biome linterとフォーマッターをモノレポ全体に設定し、統一されたコード品質を確保
@@ -8,7 +8,7 @@
   - _要件: 3.1, 7.3_
 
 - [ ] 2. 共通型定義とユーティリティの実装
-- [ ] 2.1 コアBPMNデータモデルとインターフェースの作成
+- [x] 2.1 コアBPMNデータモデルとインターフェースの作成
   - shared-typesパッケージにBPMNElement、ProcessDefinition、SequenceFlowなどの関連型を定義
   - BPMN構造の整合性チェック用バリデーションユーティリティを実装
   - 共通エラー型とレスポンスインターフェースを作成
