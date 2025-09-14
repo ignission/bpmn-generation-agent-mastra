@@ -84,7 +84,7 @@ pnpm format:check
 
 ## 実装状況
 
-実装計画は`.kiro/specs/natural-language-to-bpmn/tasks.md`に記載。主要タスク：
+実装計画は仕様ドキュメント（`.kiro/specs/natural-language-to-bpmn/tasks.md`）に記載。主要タスク：
 
 1. **基盤構築**: pnpmモノレポ構成、TypeScript設定、Biome設定
 2. **共通実装**: BPMN型定義、AWS Bedrockサービス統合
@@ -118,6 +118,18 @@ BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
 - 「もし〜なら」「〜の場合」 → ExclusiveGateway（排他ゲートウェイ）
 - 「同時に」「並行して」 → ParallelGateway（並行ゲートウェイ）
 - 「〜を終了する」「完了」 → EndEvent
+
+## MCP (Model Context Protocol) 設定
+
+このプロジェクトはMCPサーバーを使用してClaude Codeにコンテキストを提供します。
+
+### 利用可能なMCPサーバー
+- **filesystem**: プロジェクトファイルへのアクセス
+- **context7**: 最新のドキュメントとコード例を動的に取得（無料で使用可能）
+
+設定ファイル: `.mcp.json`
+
+注: Context7はAPIキーなしでも使用できますが、より高いレート制限が必要な場合は[context7.com/dashboard](https://context7.com/dashboard)でAPIキーを取得できます。
 
 ## デバッグとトラブルシューティング
 
