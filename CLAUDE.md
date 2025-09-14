@@ -1,0 +1,135 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## プロジェクト概要
+
+日本語のビジネスプロセス説明からBPMN（Business Process Model and Notation）図を自動生成するTypeScriptベースのAIシステム。MastraフレームワークとAWS Bedrockを活用し、自然言語処理によってプロセス図を効率的に作成します。
+
+## アーキテクチャ
+
+### モノレポ構成
+```
+packages/
+├── web-ui/                 # React + React Router v7 フロントエンド
+├── mastra-agent/          # Mastraエージェント（処理フロー制御）
+├── nlp-processor/         # 自然言語処理サービス（AWS Bedrock統合）
+├── bpmn-generator/        # BPMN生成サービス（XML/JSON/画像出力）
+├── shared-types/          # 共通型定義（BPMNElement, ProcessDefinition等）
+└── shared-utils/          # 共通ユーティリティ（BedrockService等）
+```
+
+### 処理フロー
+1. **入力受付**: WebUIまたはMastraプレイグラウンドから日本語プロセス説明を受信
+2. **自然言語解析**: AWS Bedrock（Claude 3/Titan）でプロセス要素を抽出
+3. **構造化**: 抽出要素をBPMN構造に変換（タスク、ゲートウェイ、フロー）
+4. **BPMN生成**: BPMN 2.0標準準拠のXML生成
+5. **出力**: XML、JSON、SVG/PNG形式で出力
+
+### 主要コンポーネント
+- **BPMNGenerationAgent**: Mastraワークフローによる全体制御
+- **NaturalLanguageProcessor**: 日本語パターン認識（条件分岐、並行処理）
+- **ProcessStructureParser**: BPMN構造構築とレイアウト最適化
+- **BPMNGenerator**: 標準形式出力生成
+
+## 開発コマンド
+
+### 初期セットアップ
+```bash
+# pnpmワークスペースの初期化
+pnpm install
+
+# 全パッケージのビルド
+pnpm -r build
+
+# 型チェック
+pnpm -r typecheck
+```
+
+### 開発サーバー起動
+```bash
+# WebUI開発サーバー
+pnpm --filter web-ui dev
+
+# Mastraプレイグラウンド
+pnpm --filter mastra-agent playground
+
+# 全パッケージの同時起動
+pnpm dev
+```
+
+### テスト実行
+```bash
+# 単体テスト
+pnpm test
+
+# 統合テスト
+pnpm test:integration
+
+# AIプロンプトテスト（Mastraプレイグラウンド）
+pnpm --filter mastra-agent test:prompts
+```
+
+### コード品質
+```bash
+# Biome linter実行
+pnpm lint
+
+# フォーマット
+pnpm format
+
+# フォーマットチェック
+pnpm format:check
+```
+
+## 実装状況
+
+実装計画は`.kiro/specs/natural-language-to-bpmn/tasks.md`に記載。主要タスク：
+
+1. **基盤構築**: pnpmモノレポ構成、TypeScript設定、Biome設定
+2. **共通実装**: BPMN型定義、AWS Bedrockサービス統合
+3. **AI処理**: プロンプトエンジニアリング、レスポンス解析
+4. **BPMN変換**: 構造パーサー、レイアウト最適化
+5. **出力生成**: XML/JSON/画像フォーマット対応
+6. **Mastra統合**: エージェントワークフロー、プレイグラウンド
+7. **WebUI**: React Router v7、BPMNビューアー/エディター
+8. **サンプル**: プロセス例ライブラリ、学習機能
+9. **統合テスト**: E2Eテスト、エラーハンドリング
+
+## AWS Bedrock設定
+
+### 必要な環境変数
+```bash
+AWS_REGION=ap-northeast-1
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+```
+
+### 対応モデル
+- Claude 3 Sonnet（推奨）: 高精度な日本語プロセス解析
+- Amazon Titan Text: 代替モデル
+
+## BPMN要素の対応
+
+### 日本語パターン → BPMN要素
+- 「〜を開始する」「〜から始める」 → StartEvent
+- 「〜を実行する」「〜を処理する」 → Task/UserTask/ServiceTask
+- 「もし〜なら」「〜の場合」 → ExclusiveGateway（排他ゲートウェイ）
+- 「同時に」「並行して」 → ParallelGateway（並行ゲートウェイ）
+- 「〜を終了する」「完了」 → EndEvent
+
+## デバッグとトラブルシューティング
+
+### Mastraプレイグラウンドでのデバッグ
+```bash
+# プレイグラウンド起動
+pnpm --filter mastra-agent playground
+
+# 処理ステップの可視化とプロンプト最適化が可能
+```
+
+### よくあるエラーと対処法
+- **AWS Bedrock接続エラー**: 環境変数とIAM権限を確認
+- **BPMN生成失敗**: 入力テキストの構造を確認、プロンプトを調整
+- **レイアウト問題**: ProcessStructureParser.optimizeLayoutのパラメータを調整
