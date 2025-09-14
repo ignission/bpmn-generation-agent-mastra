@@ -1,0 +1,27 @@
+{
+	"name": "bpmn-generation-agent-mastra",
+	"version": "1.0.0",
+	"private": true,
+	"description": "日本語のビジネスプロセス説明からBPMN図を自動生成するAIシステム",
+	"author": "",
+	"license": "MIT",
+	"engines": {
+		"node": ">=18.0.0",
+		"pnpm": ">=8.0.0"
+	},
+	"scripts": {
+		"dev": "pnpm -r --parallel dev",
+		"build": "pnpm -r build",
+		"typecheck": "pnpm -r typecheck",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"format:check": "biome format .",
+		"test": "pnpm -r test",
+		"test:integration": "pnpm -r test:integration",
+		"clean": "pnpm -r clean && rm -rf node_modules"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.2.4",
+		"typescript": "^5.6.3"
+	}
+}

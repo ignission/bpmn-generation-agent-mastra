@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"allowSyntheticDefaultImports": true,
+		"baseUrl": ".",
+		"paths": {
+			"@bpmn-agent/shared-types": ["./packages/shared-types/src"],
+			"@bpmn-agent/shared-utils": ["./packages/shared-utils/src"],
+			"@bpmn-agent/nlp-processor": ["./packages/nlp-processor/src"],
+			"@bpmn-agent/bpmn-generator": ["./packages/bpmn-generator/src"],
+			"@bpmn-agent/mastra-agent": ["./packages/mastra-agent/src"]
+		}
+	},
+	"exclude": ["node_modules", "**/dist", "**/build", "**/*.spec.ts", "**/*.test.ts"]
+}
