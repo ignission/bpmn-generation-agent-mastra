@@ -58,6 +58,15 @@ export interface ParallelGateway extends FlowElement {
 	$type: 'bpmn:ParallelGateway';
 }
 
+export interface InclusiveGateway extends FlowElement {
+	$type: 'bpmn:InclusiveGateway';
+	default?: string;
+}
+
+export interface IntermediateEvent extends FlowElement {
+	$type: 'bpmn:IntermediateCatchEvent' | 'bpmn:IntermediateThrowEvent';
+}
+
 export interface SequenceFlow extends BaseElement {
 	$type: 'bpmn:SequenceFlow';
 	id: string;
@@ -65,6 +74,24 @@ export interface SequenceFlow extends BaseElement {
 	targetRef: string;
 	conditionExpression?: BaseElement;
 }
+
+// BPMN要素のユニオン型
+export type BPMNElement =
+	| StartEvent
+	| EndEvent
+	| Task
+	| UserTask
+	| ServiceTask
+	| ExclusiveGateway
+	| ParallelGateway
+	| InclusiveGateway
+	| IntermediateEvent
+	| SequenceFlow;
+
+export type BPMNEventElement = StartEvent | EndEvent | IntermediateEvent;
+export type BPMNTaskElement = Task | UserTask | ServiceTask;
+export type BPMNGatewayElement = ExclusiveGateway | ParallelGateway | InclusiveGateway;
+export type BPMNFlowElement = BPMNEventElement | BPMNTaskElement | BPMNGatewayElement;
 
 // 日本語プロセス解析用の拡張型
 export interface JapaneseProcessInput {
@@ -116,9 +143,10 @@ export interface ExtractedElements {
 	}>;
 }
 
-// AWS Bedrock用のプロンプト設定
-export interface BedrockPromptConfig {
-	modelId: string;
+// AI統合設定（Mastra経由）
+export interface AIConfig {
+	provider: 'openai' | 'anthropic' | 'bedrock';
+	model: string;
 	temperature?: number;
 	maxTokens?: number;
 	systemPrompt?: string;
@@ -128,7 +156,7 @@ export interface BedrockPromptConfig {
 export interface AgentConfig {
 	name: string;
 	description: string;
-	bedrockConfig: BedrockPromptConfig;
+	aiConfig: AIConfig;
 }
 
 // BPMN生成オプション
@@ -140,3 +168,8 @@ export interface BPMNGenerationOptions {
 	};
 	validateSchema?: boolean;
 }
+
+// 他のモジュールからのエクスポート
+export * from './validation.js';
+export * from './utils.js';
+export * from './api.js';
