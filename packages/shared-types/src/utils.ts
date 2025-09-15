@@ -98,10 +98,14 @@ export function validateProcessStructure(process: Process): ProcessValidation {
 		.filter((id): id is string => id !== undefined);
 
 	const connectedElements = new Set<string>();
-	flows.forEach((flow) => {
-		if (flow.sourceRef) connectedElements.add(flow.sourceRef);
-		if (flow.targetRef) connectedElements.add(flow.targetRef);
-	});
+	for (const flow of flows) {
+		if (flow.sourceRef) {
+			connectedElements.add(flow.sourceRef);
+		}
+		if (flow.targetRef) {
+			connectedElements.add(flow.targetRef);
+		}
+	}
 
 	const hasOrphanedElements = flowElementIds.some((id) => !connectedElements.has(id));
 
@@ -127,14 +131,17 @@ export function validateProcessStructure(process: Process): ProcessValidation {
 // 循環参照検出（深度優先探索）
 function detectCircularReferences(flows: SequenceFlow[]): string[] {
 	const graph = new Map<string, string[]>();
-	flows.forEach((flow) => {
+	for (const flow of flows) {
 		if (flow.sourceRef && flow.targetRef) {
 			if (!graph.has(flow.sourceRef)) {
 				graph.set(flow.sourceRef, []);
 			}
-			graph.get(flow.sourceRef)!.push(flow.targetRef);
+			const sourceArray = graph.get(flow.sourceRef);
+			if (sourceArray) {
+				sourceArray.push(flow.targetRef);
+			}
 		}
-	});
+	}
 
 	const visited = new Set<string>();
 	const recursionStack = new Set<string>();
@@ -142,7 +149,7 @@ function detectCircularReferences(flows: SequenceFlow[]): string[] {
 
 	function dfs(node: string, path: string[]): boolean {
 		if (recursionStack.has(node)) {
-			cycles.push(path.join(' -> ') + ' -> ' + node);
+			cycles.push(`${path.join(' -> ')} -> ${node}`);
 			return true;
 		}
 
@@ -171,6 +178,93 @@ function detectCircularReferences(flows: SequenceFlow[]): string[] {
 	}
 
 	return cycles;
+}
+
+// プロセス構造エラーの検証
+function validateProcessStructureErrors(
+	process: Process,
+	structureValidation: ProcessValidation,
+): { errors: ValidationError[]; warnings: ValidationWarning[] } {
+	const errors: ValidationError[] = [];
+	const warnings: ValidationWarning[] = [];
+
+	if (!structureValidation.hasStartEvent) {
+		warnings.push({
+			code: 'NO_START_EVENT',
+			message: 'プロセスに開始イベントがありません',
+			elementId: process.id,
+			elementType: process.$type,
+			severity: 'warning',
+		});
+	}
+
+	if (!structureValidation.hasEndEvent) {
+		warnings.push({
+			code: 'NO_END_EVENT',
+			message: 'プロセスに終了イベントがありません',
+			elementId: process.id,
+			elementType: process.$type,
+			severity: 'warning',
+		});
+	}
+
+	if (structureValidation.hasOrphanedElements) {
+		warnings.push({
+			code: 'ORPHANED_ELEMENTS',
+			message: '接続されていない要素があります',
+			elementId: process.id,
+			elementType: process.$type,
+			severity: 'warning',
+		});
+	}
+
+	if (structureValidation.hasUnconnectedFlows) {
+		errors.push({
+			code: 'UNCONNECTED_FLOWS',
+			message: '存在しない要素を参照するフローがあります',
+			elementId: process.id,
+			elementType: process.$type,
+			severity: 'error',
+		});
+	}
+
+	for (const cycle of structureValidation.circularReferences) {
+		errors.push({
+			code: 'CIRCULAR_REFERENCE',
+			message: `循環参照が検出されました: ${cycle}`,
+			elementId: process.id,
+			elementType: process.$type,
+			severity: 'error',
+		});
+	}
+
+	return { errors, warnings };
+}
+
+// 単一プロセスの検証
+function validateSingleProcess(process: Process): {
+	errors: ValidationError[];
+	warnings: ValidationWarning[];
+} {
+	const errors: ValidationError[] = [];
+	const warnings: ValidationWarning[] = [];
+
+	// プロセス基本チェック
+	errors.push(...validateBPMNElement(process));
+
+	// プロセス構造チェック
+	const structureValidation = validateProcessStructure(process);
+	const structureResult = validateProcessStructureErrors(process, structureValidation);
+	errors.push(...structureResult.errors);
+	warnings.push(...structureResult.warnings);
+
+	// 各フロー要素の検証
+	const flowElements = process.flowElements || [];
+	for (const element of flowElements) {
+		errors.push(...validateBPMNElement(element));
+	}
+
+	return { errors, warnings };
 }
 
 // BPMN定義全体の検証
@@ -207,69 +301,11 @@ export function validateDefinitions(definitions: Definitions): ValidationResult 
 		});
 	}
 
-	processes.forEach((process) => {
-		// プロセス基本チェック
-		errors.push(...validateBPMNElement(process));
-
-		// プロセス構造チェック
-		const structureValidation = validateProcessStructure(process);
-
-		if (!structureValidation.hasStartEvent) {
-			warnings.push({
-				code: 'NO_START_EVENT',
-				message: 'プロセスに開始イベントがありません',
-				elementId: process.id,
-				elementType: process.$type,
-				severity: 'warning',
-			});
-		}
-
-		if (!structureValidation.hasEndEvent) {
-			warnings.push({
-				code: 'NO_END_EVENT',
-				message: 'プロセスに終了イベントがありません',
-				elementId: process.id,
-				elementType: process.$type,
-				severity: 'warning',
-			});
-		}
-
-		if (structureValidation.hasOrphanedElements) {
-			warnings.push({
-				code: 'ORPHANED_ELEMENTS',
-				message: '接続されていない要素があります',
-				elementId: process.id,
-				elementType: process.$type,
-				severity: 'warning',
-			});
-		}
-
-		if (structureValidation.hasUnconnectedFlows) {
-			errors.push({
-				code: 'UNCONNECTED_FLOWS',
-				message: '存在しない要素を参照するフローがあります',
-				elementId: process.id,
-				elementType: process.$type,
-				severity: 'error',
-			});
-		}
-
-		structureValidation.circularReferences.forEach((cycle) => {
-			errors.push({
-				code: 'CIRCULAR_REFERENCE',
-				message: `循環参照が検出されました: ${cycle}`,
-				elementId: process.id,
-				elementType: process.$type,
-				severity: 'error',
-			});
-		});
-
-		// 各フロー要素の検証
-		const flowElements = process.flowElements || [];
-		flowElements.forEach((element) => {
-			errors.push(...validateBPMNElement(element));
-		});
-	});
+	for (const process of processes) {
+		const processResult = validateSingleProcess(process);
+		errors.push(...processResult.errors);
+		warnings.push(...processResult.warnings);
+	}
 
 	return {
 		isValid: errors.length === 0,
@@ -285,7 +321,7 @@ export function validateWithRules(
 ): ValidationError[] {
 	const errors: ValidationError[] = [];
 
-	rules.forEach((rule) => {
+	for (const rule of rules) {
 		try {
 			errors.push(...rule.check(elements));
 		} catch (error) {
@@ -295,7 +331,7 @@ export function validateWithRules(
 				severity: 'error',
 			});
 		}
-	});
+	}
 
 	return errors;
 }
@@ -305,7 +341,7 @@ export function validateUniqueIds(elements: BaseElement[]): ValidationError[] {
 	const errors: ValidationError[] = [];
 	const seenIds = new Set<string>();
 
-	elements.forEach((element) => {
+	for (const element of elements) {
 		if (element.id) {
 			if (seenIds.has(element.id)) {
 				errors.push({
@@ -319,7 +355,7 @@ export function validateUniqueIds(elements: BaseElement[]): ValidationError[] {
 				seenIds.add(element.id);
 			}
 		}
-	});
+	}
 
 	return errors;
 }
