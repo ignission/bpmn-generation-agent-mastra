@@ -1,10 +1,17 @@
 // API関連の共通型定義とレスポンスインターフェース
+import type {
+	BPMNElement,
+	Definitions,
+	ProcessStructure,
+	ValidationError,
+	ValidationWarning,
+} from './index.js';
 
 // 型定義の再定義（循環インポート回避）
 interface ProcessAnalysisResult {
 	originalText: string;
-	extractedElements: any[];
-	processStructure: any;
+	extractedElements: BPMNElement[];
+	processStructure: ProcessStructure;
 	confidence: number;
 	warnings: string[];
 }
@@ -20,8 +27,8 @@ interface BPMNGenerationOptions {
 
 interface ValidationResult {
 	isValid: boolean;
-	errors: any[];
-	warnings: any[];
+	errors: ValidationError[];
+	warnings: ValidationWarning[];
 }
 
 interface AnalysisQualityScore {
@@ -140,7 +147,7 @@ export interface ProcessingStep {
 // BPMN検証リクエスト
 export interface BPMNValidationRequest {
 	bpmnXml?: string;
-	definitions?: any;
+	definitions?: Definitions;
 	options?: {
 		strictMode?: boolean;
 		customRules?: string[];

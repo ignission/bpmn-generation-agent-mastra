@@ -87,28 +87,29 @@ export function validateBPMNElement(element: BaseElement): ValidationError[] {
 export function validateProcessStructure(process: Process): ProcessValidation {
 	const flowElements = process.flowElements || [];
 
-	const hasStartEvent = flowElements.some(el => el.$type === 'bpmn:StartEvent');
-	const hasEndEvent = flowElements.some(el => el.$type === 'bpmn:EndEvent');
+	const hasStartEvent = flowElements.some((el) => el.$type === 'bpmn:StartEvent');
+	const hasEndEvent = flowElements.some((el) => el.$type === 'bpmn:EndEvent');
 
 	// 接続されていない要素の検出
-	const flows = flowElements.filter(el => el.$type === 'bpmn:SequenceFlow') as SequenceFlow[];
+	const flows = flowElements.filter((el) => el.$type === 'bpmn:SequenceFlow') as SequenceFlow[];
 	const flowElementIds = flowElements
-		.filter(el => el.$type !== 'bpmn:SequenceFlow')
-		.map(el => el.id)
+		.filter((el) => el.$type !== 'bpmn:SequenceFlow')
+		.map((el) => el.id)
 		.filter((id): id is string => id !== undefined);
 
 	const connectedElements = new Set<string>();
-	flows.forEach(flow => {
+	flows.forEach((flow) => {
 		if (flow.sourceRef) connectedElements.add(flow.sourceRef);
 		if (flow.targetRef) connectedElements.add(flow.targetRef);
 	});
 
-	const hasOrphanedElements = flowElementIds.some(id => !connectedElements.has(id));
+	const hasOrphanedElements = flowElementIds.some((id) => !connectedElements.has(id));
 
 	// 未接続フローの検出
-	const hasUnconnectedFlows = flows.some(flow =>
-		(flow.sourceRef && !flowElementIds.includes(flow.sourceRef)) ||
-		(flow.targetRef && !flowElementIds.includes(flow.targetRef))
+	const hasUnconnectedFlows = flows.some(
+		(flow) =>
+			(flow.sourceRef && !flowElementIds.includes(flow.sourceRef)) ||
+			(flow.targetRef && !flowElementIds.includes(flow.targetRef)),
 	);
 
 	// 循環参照の検出（簡易版）
@@ -126,7 +127,7 @@ export function validateProcessStructure(process: Process): ProcessValidation {
 // 循環参照検出（深度優先探索）
 function detectCircularReferences(flows: SequenceFlow[]): string[] {
 	const graph = new Map<string, string[]>();
-	flows.forEach(flow => {
+	flows.forEach((flow) => {
 		if (flow.sourceRef && flow.targetRef) {
 			if (!graph.has(flow.sourceRef)) {
 				graph.set(flow.sourceRef, []);
@@ -192,7 +193,9 @@ export function validateDefinitions(definitions: Definitions): ValidationResult 
 	}
 
 	// 各プロセスの検証
-	const processes = definitions.rootElements.filter(el => el.$type === 'bpmn:Process') as Process[];
+	const processes = definitions.rootElements.filter(
+		(el) => el.$type === 'bpmn:Process',
+	) as Process[];
 
 	if (processes.length === 0) {
 		errors.push({
@@ -204,7 +207,7 @@ export function validateDefinitions(definitions: Definitions): ValidationResult 
 		});
 	}
 
-	processes.forEach(process => {
+	processes.forEach((process) => {
 		// プロセス基本チェック
 		errors.push(...validateBPMNElement(process));
 
@@ -251,7 +254,7 @@ export function validateDefinitions(definitions: Definitions): ValidationResult 
 			});
 		}
 
-		structureValidation.circularReferences.forEach(cycle => {
+		structureValidation.circularReferences.forEach((cycle) => {
 			errors.push({
 				code: 'CIRCULAR_REFERENCE',
 				message: `循環参照が検出されました: ${cycle}`,
@@ -263,7 +266,7 @@ export function validateDefinitions(definitions: Definitions): ValidationResult 
 
 		// 各フロー要素の検証
 		const flowElements = process.flowElements || [];
-		flowElements.forEach(element => {
+		flowElements.forEach((element) => {
 			errors.push(...validateBPMNElement(element));
 		});
 	});
@@ -276,10 +279,13 @@ export function validateDefinitions(definitions: Definitions): ValidationResult 
 }
 
 // カスタムルールによる検証
-export function validateWithRules(elements: BaseElement[], rules: ValidationRule[]): ValidationError[] {
+export function validateWithRules(
+	elements: BaseElement[],
+	rules: ValidationRule[],
+): ValidationError[] {
 	const errors: ValidationError[] = [];
 
-	rules.forEach(rule => {
+	rules.forEach((rule) => {
 		try {
 			errors.push(...rule.check(elements));
 		} catch (error) {
@@ -299,7 +305,7 @@ export function validateUniqueIds(elements: BaseElement[]): ValidationError[] {
 	const errors: ValidationError[] = [];
 	const seenIds = new Set<string>();
 
-	elements.forEach(element => {
+	elements.forEach((element) => {
 		if (element.id) {
 			if (seenIds.has(element.id)) {
 				errors.push({

@@ -5,7 +5,7 @@
 export interface BaseElement {
 	id?: string;
 	$type: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 export interface Definitions extends BaseElement {
@@ -99,6 +99,17 @@ export interface JapaneseProcessInput {
 	context?: string;
 }
 
+// プロセス構造の型（API用）
+export interface ProcessStructure {
+	definitions: Definitions;
+	summary: {
+		totalTasks: number;
+		totalGateways: number;
+		totalEvents: number;
+		flows: number;
+	};
+}
+
 // AI解析結果の型
 export interface ProcessAnalysisResult {
 	// BPMN定義
@@ -169,7 +180,7 @@ export interface BPMNGenerationOptions {
 	validateSchema?: boolean;
 }
 
+export * from './api.js';
+export * from './utils.js';
 // 他のモジュールからのエクスポート
 export * from './validation.js';
-export * from './utils.js';
-export * from './api.js';

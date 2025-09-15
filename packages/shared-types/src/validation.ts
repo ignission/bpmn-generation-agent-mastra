@@ -27,7 +27,7 @@ export interface ValidationRule {
 	id: string;
 	name: string;
 	description: string;
-	check: (elements: any[]) => ValidationError[];
+	check: (elements: unknown[]) => ValidationError[];
 }
 
 // プロセス構造の検証
