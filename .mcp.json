@@ -2,11 +2,26 @@
 	"mcpServers": {
 		"filesystem": {
 			"command": "npx",
-			"args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-filesystem",
+				"."
+			]
 		},
 		"context7": {
 			"command": "npx",
-			"args": ["-y", "@upstash/context7-mcp"]
+			"args": [
+				"-y",
+				"@upstash/context7-mcp"
+			]
+		},
+		"mastra": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@mastra/mcp-docs-server"
+			],
+			"type": "stdio"
 		}
 	}
 }
