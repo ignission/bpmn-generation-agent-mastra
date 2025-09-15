@@ -12,10 +12,9 @@
 packages/
 ├── web-ui/                 # React + React Router v7 フロントエンド
 ├── mastra-agent/          # Mastraエージェント実装
-├── nlp-processor/         # 自然言語処理サービス
+├── nlp-processor/         # 自然言語処理サービス（Mastra統合）
 ├── bpmn-generator/        # BPMN生成サービス
-├── shared-types/          # 共通型定義
-└── shared-utils/          # 共通ユーティリティ
+└── shared-types/          # 共通型定義
 ```
 
 ### システム全体構成
@@ -31,7 +30,7 @@ graph TB
         Agent[BPMN Generation Agent]
         Workflow[Processing Workflow]
         Tools[AI Tools & Services]
-        Bedrock[AWS Bedrock<br/>Claude 3 / Titan]
+        AI[Mastra AI<br/>大規模言語モデル]
     end
     
     subgraph "Processing Pipeline"
@@ -50,8 +49,8 @@ graph TB
     Playground --> Agent
     Agent --> Workflow
     Workflow --> NLP
-    NLP --> Bedrock
-    Bedrock --> Parser
+    NLP --> AI
+    AI --> Parser
     Parser --> Generator
     Generator --> XMLOut
     Generator --> JSONOut
@@ -61,7 +60,7 @@ graph TB
 ### 処理フロー
 
 1. **入力受付**: WebUIまたはプレイグラウンドから日本語プロセス説明を受信
-2. **自然言語解析**: AWS Bedrock経由でClaude 3等のLLMを使用してプロセス要素（タスク、条件、フロー）を抽出
+2. **自然言語解析**: Mastra統合AI（大規模言語モデル）を使用してプロセス要素（タスク、条件、フロー）を抽出
 3. **構造化**: 抽出した要素をBPMN構造に変換
 4. **BPMN生成**: 標準的なBPMN XMLを生成
 5. **出力**: XML、JSON、画像形式で出力
@@ -94,7 +93,7 @@ interface BPMNOutput {
 }
 ```
 
-### 2. Natural Language Processor (AWS Bedrock)
+### 2. Natural Language Processor (Mastra AI)
 
 **責務**: 日本語プロセス説明の解析と要素抽出
 
@@ -105,16 +104,16 @@ interface NaturalLanguageProcessor {
   detectConditions(text: string): Promise<Condition[]>
 }
 
-interface BedrockConfig {
-  region: string
-  modelId: 'anthropic.claude-3-sonnet-20240229-v1:0' | 'amazon.titan-text-premier-v1:0'
+interface AIConfig {
+  provider: 'openai' | 'anthropic' | 'bedrock'
+  model: string
   maxTokens: number
   temperature: number
 }
 
-interface BedrockService {
-  invokeModel(prompt: string, config: BedrockConfig): Promise<string>
-  streamModel(prompt: string, config: BedrockConfig): AsyncIterable<string>
+interface MastraAIService {
+  generateBPMN(prompt: string, config: AIConfig): Promise<string>
+  streamGeneration(prompt: string, config: AIConfig): AsyncIterable<string>
 }
 
 interface ProcessElements {

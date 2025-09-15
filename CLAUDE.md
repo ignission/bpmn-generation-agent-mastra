@@ -13,22 +13,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 packages/
 ├── web-ui/                 # React + React Router v7 フロントエンド
 ├── mastra-agent/          # Mastraエージェント（処理フロー制御）
-├── nlp-processor/         # 自然言語処理サービス（AWS Bedrock統合）
+├── nlp-processor/         # 自然言語処理サービス（Mastra統合）
 ├── bpmn-generator/        # BPMN生成サービス（XML/JSON/画像出力）
-├── shared-types/          # 共通型定義（BPMNElement, ProcessDefinition等）
-└── shared-utils/          # 共通ユーティリティ（BedrockService等）
+└── shared-types/          # 共通型定義（BPMNElement, ProcessDefinition等）
 ```
 
 ### 処理フロー
 1. **入力受付**: WebUIまたはMastraプレイグラウンドから日本語プロセス説明を受信
-2. **自然言語解析**: AWS Bedrock（Claude 3/Titan）でプロセス要素を抽出
+2. **自然言語解析**: Mastra統合AI（大規模言語モデル）でプロセス要素を抽出
 3. **構造化**: 抽出要素をBPMN構造に変換（タスク、ゲートウェイ、フロー）
 4. **BPMN生成**: BPMN 2.0標準準拠のXML生成
 5. **出力**: XML、JSON、SVG/PNG形式で出力
 
 ### 主要コンポーネント
 - **BPMNGenerationAgent**: Mastraワークフローによる全体制御
-- **NaturalLanguageProcessor**: 日本語パターン認識（条件分岐、並行処理）
 - **ProcessStructureParser**: BPMN構造構築とレイアウト最適化
 - **BPMNGenerator**: 標準形式出力生成
 
@@ -87,8 +85,8 @@ pnpm format:check
 実装計画は仕様ドキュメント（`.kiro/specs/natural-language-to-bpmn/tasks.md`）に記載。主要タスク：
 
 1. **基盤構築**: pnpmモノレポ構成、TypeScript設定、Biome設定
-2. **共通実装**: BPMN型定義、AWS Bedrockサービス統合
-3. **AI処理**: プロンプトエンジニアリング、レスポンス解析
+2. **共通実装**: BPMN型定義
+3. **AI処理**: Mastra統合によるプロンプト管理
 4. **BPMN変換**: 構造パーサー、レイアウト最適化
 5. **出力生成**: XML/JSON/画像フォーマット対応
 6. **Mastra統合**: エージェントワークフロー、プレイグラウンド
@@ -96,19 +94,32 @@ pnpm format:check
 8. **サンプル**: プロセス例ライブラリ、学習機能
 9. **統合テスト**: E2Eテスト、エラーハンドリング
 
-## AWS Bedrock設定
+## AI設定（Mastra統合）
 
-### 必要な環境変数
+MastraフレームワークのビルトインAI機能を使用します。独自のAIサービス実装は不要です。
+
+### 環境変数設定
+
+#### 主要なAIプロバイダー
 ```bash
-AWS_REGION=ap-northeast-1
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+# .envファイルに追加（いずれか1つ以上）
+OPENAI_API_KEY=your_openai_api_key
+ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
-### 対応モデル
-- Claude 3 Sonnet（推奨）: 高精度な日本語プロセス解析
-- Amazon Titan Text: 代替モデル
+#### エンタープライズ向けAIプロバイダー
+```bash
+# AWS Bedrock
+AWS_REGION=ap-northeast-1
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+```
+
+### 対応AIプロバイダー
+- **OpenAI**: GPT-4/GPT-3.5による日本語プロセス解析
+- **Anthropic**: Claude 3 Sonnetによる高精度解析
+- **AWS Bedrock**: エンタープライズ向けマネージドサービス
+- Mastraが自動的にプロバイダーを管理・統合
 
 ## BPMN要素の対応
 
