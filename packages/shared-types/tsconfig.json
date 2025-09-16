@@ -5,7 +5,10 @@
 		"outDir": "./dist",
 		"composite": true,
 		"declaration": true,
+		"declarationMap": true,
 		"emitDeclarationOnly": false,
+		"module": "CommonJS",
+		"moduleResolution": "node",
 		"types": ["bpmn-moddle"]
 	},
 	"include": ["src/**/*"],
