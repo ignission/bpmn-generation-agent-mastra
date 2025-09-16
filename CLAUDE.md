@@ -4,31 +4,44 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-日本語のビジネスプロセス説明からBPMN（Business Process Model and Notation）図を自動生成するTypeScriptベースのAIシステム。MastraフレームワークとAWS Bedrockを活用し、自然言語処理によってプロセス図を効率的に作成します。
+日本語のビジネスプロセス説明からBPMN（Business Process Model and Notation）図を自動生成するTypeScriptベースのAIシステム。MastraフレームワークとOpenAI GPT-4o-miniを活用し、自然言語処理によってプロセス図を効率的に作成します。
 
 ## アーキテクチャ
 
-### モノレポ構成
+### 現在の実装構成
 ```
 packages/
-├── web-ui/                 # React + React Router v7 フロントエンド
-├── mastra-agent/          # Mastraエージェント（処理フロー制御）
-├── nlp-processor/         # 自然言語処理サービス（Mastra統合）
-├── bpmn-generator/        # BPMN生成サービス（XML/JSON/画像出力）
-└── shared-types/          # 共通型定義（BPMNElement, ProcessDefinition等）
+└── mastra-agent/          # Mastraエージェント（BPMN生成機能統合済み）
+    ├── src/mastra/agents/        # BPMNエージェント実装
+    ├── src/mastra/tools/         # BPMN生成・可視化ツール
+    └── generated/                # 生成されたBPMNファイル
 ```
 
-### 処理フロー
-1. **入力受付**: WebUIまたはMastraプレイグラウンドから日本語プロセス説明を受信
-2. **自然言語解析**: Mastra統合AI（大規模言語モデル）でプロセス要素を抽出
+### 将来のモノレポ構成（計画）
+```
+packages/
+├── web-ui/                # React WebUI（未実装）
+├── mastra-agent/          # Mastraエージェント（実装済み）
+└── shared-types/          # 共通型定義（未実装）
+```
+
+### 処理フロー（現在の実装）
+1. **入力受付**: **Mastraプレイグラウンド**から日本語プロセス説明を受信
+2. **自然言語解析**: **GPT-4o-mini**でプロセス要素を抽出
 3. **構造化**: 抽出要素をBPMN構造に変換（タスク、ゲートウェイ、フロー）
 4. **BPMN生成**: BPMN 2.0標準準拠のXML生成
-5. **出力**: XML、JSON、SVG/PNG形式で出力
+5. **出力**: BPMN XML + **インタラクティブHTMLビューアー**生成
+6. **可視化テスト**: 複数表示形式（SVG、データURI等）をテスト中
 
-### 主要コンポーネント
-- **BPMNGenerationAgent**: Mastraワークフローによる全体制御
-- **ProcessStructureParser**: BPMN構造構築とレイアウト最適化
-- **BPMNGenerator**: 標準形式出力生成
+### 主要コンポーネント（実装済み）
+- **bpmnAgent**: Mastraエージェント（統合制御）
+- **bpmnTool**: BPMN XML/JSON生成ツール
+- **bpmnVisualizationTool**: BPMN可視化ツール（HTML + 複数形式テスト）
+
+### 未実装コンポーネント
+- ProcessStructureParser（計画段階）
+- React WebUI（計画段階）
+- shared-types パッケージ（計画段階）
 
 ## 開発コマンド
 

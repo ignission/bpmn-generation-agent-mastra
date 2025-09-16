@@ -48,10 +48,12 @@
 
 ## 使用方法
 
-1. WebUIまたはMastraプレイグラウンドから日本語でビジネスプロセスを入力
-2. AIが自動的にプロセス要素を解析・抽出
-3. BPMN図が自動生成される
-4. XML、JSON、SVG/PNG形式で出力・ダウンロード可能
+1. **Mastraプレイグラウンド**から日本語でビジネスプロセスを入力
+2. GPT-4o-miniが自動的にプロセス要素を解析・抽出
+3. BPMN XML + インタラクティブHTMLビューアーが生成
+4. 複数表示形式をテスト中（SVG、データURI等）
+
+**注意**: WebUIは現在未実装。Mastraプレイグラウンドを使用してください。
 
 ## AI設定
 
@@ -64,23 +66,30 @@ OPENAI_API_KEY=your_openai_api_key
 ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
-### エンタープライズ向けプロバイダー
-```bash
-# AWS Bedrock
-AWS_REGION=ap-northeast-1
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-```
+### 現在対応済みプロバイダー
+- **OpenAI**: GPT-4o-mini（実装済み・推奨）
+- **Anthropic**: Claude（Mastra統合済み・未テスト）
+
+### 将来対応予定
+- AWS Bedrock（要実装）
 
 ## プロジェクト構成
 
+**現在の実装状況（シングルパッケージ）：**
 ```
 packages/
-├── web-ui/          # React + React Router v7 フロントエンド
-├── mastra-agent/    # Mastraエージェント（処理フロー制御）
-├── nlp-processor/   # 自然言語処理サービス（Mastra統合）
-├── bpmn-generator/  # BPMN生成サービス（XML/JSON/画像出力）
-└── shared-types/    # 共通型定義（BPMNElement, ProcessDefinition等）
+└── mastra-agent/    # Mastraエージェント（BPMN生成機能統合済み）
+    ├── src/mastra/agents/        # BPMNエージェント
+    ├── src/mastra/tools/         # BPMN生成・可視化ツール
+    └── generated/                # 生成されたBPMNファイル
+```
+
+**将来予定のモノレポ構成：**
+```
+packages/
+├── web-ui/          # React WebUI（未実装）
+├── mastra-agent/    # Mastraエージェント（実装済み）
+└── shared-types/    # 共通型定義（未実装）
 ```
 
 ## 開発コマンド

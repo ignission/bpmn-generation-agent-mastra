@@ -1,23 +1,23 @@
 # 実装計画
 
-- [x] 1. pnpmモノレポ構成とプロジェクト基盤の構築
-  - web-ui、mastra-agent、nlp-processor、bpmn-generator、shared-types、shared-utilsパッケージを含むpnpmワークスペース設定を作成
-  - 各パッケージのTypeScript設定を初期化し、パッケージ間の適切な参照を設定
-  - Biome linterとフォーマッターをモノレポ全体に設定し、統一されたコード品質を確保
-  - モノレポ用のビルドスクリプトと開発環境をセットアップ
+- [x] 1. **シングルパッケージ構成とプロジェクト基盤の構築**
+  - ✅ mastra-agentパッケージのTypeScript環境セットアップ完了
+  - ✅ Biome linterとフォーマッター設定完了
+  - ✅ Mastraフレームワーク統合完了
+  - ⚠️ モノレポ構成は未実装（将来計画）
   - _要件: 3.1, 7.3_
 
-- [x] 2. 共通型定義とユーティリティの実装
-- [x] 2.1 コアBPMNデータモデルとインターフェースの作成
-  - shared-typesパッケージにBPMNElement、ProcessDefinition、SequenceFlowなどの関連型を定義
-  - BPMN構造の整合性チェック用バリデーションユーティリティを実装
-  - 共通エラー型とレスポンスインターフェースを作成
+- [~] 2. **共通型定義とユーティリティの実装**
+- [~] 2.1 コアBPMNデータモデルとインターフェースの作成
+  - ✅ bpmn-tool.ts内でBPMNElementsインターフェース定義済み
+  - ⚠️ shared-typesパッケージは未作成（独立パッケージ化予定）
+  - ✅ 基本的なバリデーションロジック実装済み
   - _要件: 1.1, 2.1, 4.1_
 
-- [x] 2.2 MastraのAI統合機能を使用
-  - MastraフレームワークのビルトインAI機能を活用（OpenAI等の統合済み）
-  - 独自のAIサービス実装は不要（Mastraが提供）
-  - Mastraエージェント内でAI呼び出しを直接実装
+- [x] 2.2 **MastraAI統合完了**
+  - ✅ OpenAI GPT-4o-miniとMastra統合完了
+  - ✅ bpmnAgent内でAI呼び出し実装済み
+  - ✅ AWS Bedrockは削除してシンプル化
   - _要件: 1.1, 3.1, 7.1_
 
 - [ ] 3. プロンプトエンジニアリングとレスポンス解析サービスの開発

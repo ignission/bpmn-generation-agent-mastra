@@ -23,6 +23,7 @@
 		"@mastra/libsql": "^0.14.1",
 		"@mastra/loggers": "^0.10.11",
 		"@mastra/memory": "^0.15.1",
+		"bpmn-js": "^18.6.3",
 		"zod": "^3.25.76"
 	},
 	"devDependencies": {

@@ -180,7 +180,5 @@ export interface BPMNGenerationOptions {
 	validateSchema?: boolean;
 }
 
-export * from './api.js';
-export * from './utils.js';
 // 他のモジュールからのエクスポート
-export * from './validation.js';
+export * from './validation';
